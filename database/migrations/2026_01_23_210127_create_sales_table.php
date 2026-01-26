@@ -11,10 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('sales', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-        });
+       Schema::create('sales', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('client_id')->constrained(); // Conecta con el cliente
+    $table->string('article');
+    $table->decimal('total_value', 15, 2);
+    $table->decimal('down_payment', 15, 2); // Entrega
+    $table->integer('installments_count');  // Cantidad de cuotas
+    $table->decimal('installment_value', 15, 2);
+    $table->timestamps();
+   });
     }
 
     /**
