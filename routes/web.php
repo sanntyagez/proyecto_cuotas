@@ -12,3 +12,4 @@ Route::view('dashboard', 'dashboard')
 
 require __DIR__.'/settings.php';
 Route::get('/venta', VentaForm::class)->middleware('auth');
+Route::get('/clientes', \App\Livewire\ClientesList::class)->name('clientes');
