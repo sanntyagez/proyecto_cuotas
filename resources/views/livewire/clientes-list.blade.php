@@ -59,9 +59,9 @@
 
                     <td class="px-6 py-4 text-center flex justify-center gap-2">
                         
-                        <button class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded shadow-md text-xs uppercase">
-                            Gestionar
-                        </button>
+                       <a href="{{ route('clientes.gestion', $sale->id) }}" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded shadow-md text-xs uppercase text-decoration-none">
+                        Gestionar
+                       </a>
 
                         <button 
                             wire:click="deleteSale({{ $sale->id }})"

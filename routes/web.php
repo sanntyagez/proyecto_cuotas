@@ -1,6 +1,7 @@
 <?php
 use App\Livewire\VentaForm;
 use Illuminate\Support\Facades\Route;
+use App\Livewire\ClienteGestion;
 
 Route::get('/', function () {
     return view('welcome');
@@ -11,5 +12,7 @@ Route::view('dashboard', 'dashboard')
     ->name('dashboard');
 
 require __DIR__.'/settings.php';
-Route::get('/venta', VentaForm::class)->middleware('auth');
+// Usa la dirección completa con la barra invertida "\" al principio
+Route::get('/venta', \App\Livewire\VentaForm::class)->middleware('auth');
 Route::get('/clientes', \App\Livewire\ClientesList::class)->name('clientes');
+Route::get('/gestion/{saleId}', \App\Livewire\ClienteGestion::class)->name('clientes.gestion');
