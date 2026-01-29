@@ -15,17 +15,28 @@
                     <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
                         {{ __('Dashboard') }}
                     </flux:sidebar.item>
-                
-            <flux:sidebar.item icon="users" href="#" :current="false">
-                    {{ __('Users') }}
-                 </flux:sidebar.item>
-                 
-            <flux:sidebar.item icon="camera" href="#" :current="false">
-                 {{ __('camera') }}
-
-                </flux:sidebar.item>
-                
                 </flux:sidebar.group>
+           
+           <flux:sidebar.group :heading="__('Administración')" class="grid mt-4">
+                    <flux:sidebar.item 
+                        icon="currency-dollar" 
+                        href="/venta" 
+                        :current="request()->is('venta')" 
+                        wire:navigate
+                    >
+                        Nueva Venta
+                    </flux:sidebar.item>
+
+                    <flux:sidebar.item 
+                        icon="users" 
+                        href="/clientes" 
+                        :current="request()->is('clientes*')" 
+                        wire:navigate
+                    >
+                        Cartera de Clientes
+                    </flux:sidebar.item>
+                </flux:sidebar.group>
+           
             </flux:sidebar.nav>
 
             <flux:spacer />

@@ -4,17 +4,15 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use App\Models\Client;
-use App\Models\Sale;    // Asegúrate de que sea mayúscula si tu archivo es Sale.php
-use App\Models\Payment; // ¡Importante para crear las cuotas!
-use Carbon\Carbon;      // ¡Importante para las fechas!
+use App\Models\Sale;    
+use App\Models\Payment; 
+use Carbon\Carbon;      
 
 class VentaForm extends Component
 {
-    // 1. Definimos los campos del formulario
     public $name, $dni, $phone, $address;
     public $article, $total_value, $down_payment, $installments_count;
 
-    // Reglas de validación (para que no guarden vacío)
     protected $rules = [
         'name' => 'required',
         'dni' => 'required',
@@ -25,23 +23,24 @@ class VentaForm extends Component
 
     public function save()
     {
-        // Validamos antes de seguir
+        // 1. LIMPIEZA: Quitamos los puntos antes de cualquier otra cosa
+        if ($this->total_value) {
+            $this->total_value = str_replace('.', '', $this->total_value);
+        }
+        if ($this->down_payment) {
+            $this->down_payment = str_replace('.', '', $this->down_payment);
+        }
+
+        // 2. VALIDACIÓN: Ahora que son números puros, validamos
         $this->validate();
 
-        // A. CÁLCULOS MATEMÁTICOS (Todo ocurre aquí dentro)
-   
-        $saldo_a_financiar = $this->total_value - ($this->down_payment ?? 0);
-        
-        // Evitamos división por cero
+        // 3. CÁLCULOS
+        $saldo_a_financiar = (float)$this->total_value - (float)($this->down_payment ?? 0);
         $cantidad_cuotas = $this->installments_count > 0 ? $this->installments_count : 1;
         $valor_cuota = $saldo_a_financiar / $cantidad_cuotas;
-
-        // Fecha del primer vencimiento (1 mes a partir de hoy)
         $primer_vencimiento = Carbon::now()->addMonth();
 
-        // B. GUARDADO EN BASE DE DATOS
-        
-        // 1. Crear Cliente
+        // 4. GUARDADO DE CLIENTE
         $client = Client::create([
             'name' => $this->name,
             'dni' => $this->dni,
@@ -49,7 +48,7 @@ class VentaForm extends Component
             'address' => $this->address,
         ]);
 
-        // 2. Crear Venta (Aquí unimos los datos del form + los cálculos)
+        // 5. GUARDADO DE VENTA
         $sale = Sale::create([
             'client_id' => $client->id,
             'article' => $this->article,
@@ -57,8 +56,6 @@ class VentaForm extends Component
             'down_payment' => $this->down_payment ?? 0,
             'installments_count' => $this->installments_count,
             'installment_value' => $valor_cuota,
-            
-            // CAMPOS NUEVOS PARA EL SISTEMA AVANZADO
             'saldo_pendiente' => $saldo_a_financiar,
             'cuotas_restantes' => $this->installments_count,
             'valor_cuota_actual' => $valor_cuota,
@@ -66,7 +63,7 @@ class VentaForm extends Component
             'estado' => 'al_dia'
         ]);
 
-        // 3. Generar las Cuotas Individuales (Tabla Payments)
+        // 6. GENERAR CUOTAS
         for ($i = 1; $i <= $this->installments_count; $i++) {
             Payment::create([
                 'sale_id' => $sale->id,
@@ -76,8 +73,9 @@ class VentaForm extends Component
                 'estado' => 'pendiente',
             ]);
         }
-        // C. LIMPIEZA
-        session()->flash('message', '¡Venta registrada y cuotas generadas correctamente!');
+
+        // 7. MENSAJE Y LIMPIEZA FINAL
+        session()->flash('message', '¡Venta registrada con puntos procesados correctamente!');
         $this->reset(); 
     }
 

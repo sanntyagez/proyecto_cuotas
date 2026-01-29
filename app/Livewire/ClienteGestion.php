@@ -10,10 +10,34 @@ use Carbon\Carbon;
 class ClienteGestion extends Component
 {
     public $saleId;
+    public $editando = false; // Nueva variable para saber si estamos editando
+    public $phone, $address;  // Variables para guardar los cambios temporales
 
     public function mount($saleId)
     {
         $this->saleId = $saleId;
+        $sale = Sale::find($saleId);
+        $this->phone = $sale->client->phone;
+        $this->address = $sale->client->address;
+    }
+
+    // Función para activar el modo edición
+    public function activarEdicion()
+    {
+        $this->editando = true;
+    }
+
+    // Función para guardar los cambios del cliente
+    public function guardarCambios()
+    {
+        $sale = Sale::find($this->saleId);
+        $sale->client->update([
+            'phone' => $this->phone,
+            'address' => $this->address,
+        ]);
+
+        $this->editando = false;
+        session()->flash('message', 'Datos de contacto actualizados.');
     }
 
     public function registrarPago($paymentId)
@@ -41,7 +65,6 @@ class ClienteGestion extends Component
 
     public function render()
     {
-        // Usamos sale en minúscula si ese es el nombre de tu archivo de modelo
         $sale = \App\Models\sale::with(['client', 'payments'])->findOrFail($this->saleId);
 
         return view('livewire.cliente-gestion', [
